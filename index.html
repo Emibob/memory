@@ -1,0 +1,114 @@
+<!doctype html>
+<html>
+
+<head>
+	<title>Boxes</title>
+</head>
+
+<style>
+#grid{
+	width: 800px;
+	list-style: none;
+}
+.box{
+	width: 200px;
+	height: 200px;
+	border: 1px solid #ccc;
+	padding: 10px;
+	float: left;
+	background-position: center;
+	background-repeat: no-repeat;
+}
+.box:hover{
+	background: #000;
+}
+</style>
+
+<body>
+	<ul id="grid">
+		<li><div class="box" data-flip="king"></div></li>
+		<li><div class="box" data-flip="circle"></div></li>
+		<li><div class="box" data-flip="queen"></div></li>
+		<li><div class="box" data-flip="circle"></div></li>
+		<li><div class="box" data-flip="circle"></div></li>
+		<li><div class="box" data-flip="king"></div></li>
+		<li><div class="box" data-flip="circle"></div></li>
+		<li><div class="box" data-flip="circle"></div></li>
+		<li><div class="box" data-flip="queen"></div></li>
+	</ul>
+
+	<script>
+		//EVENTS
+		document.getElementById('grid').addEventListener('click', getDataFlip, false);
+		document.getElementById('grid').addEventListener('click', revealCard, false);
+		//document.getElementById('grid').addEventListener('click', fadeOutCard, false);
+
+		function getDataFlip(e){
+			var dataFlip = e.toElement.attributes['data-flip'].nodeValue;
+			//console.log(dataFlip, e);
+			return dataFlip;
+		}
+
+		function revealCard(e){
+			var cardShape = getDataFlip(e);
+			var card = e.target;
+
+			switch(cardShape){
+				case "king":
+					setCSS(card, "backgroundImage", "url('http://www.eso-garden.com/images/uploads_bilder/playing_cards_birthday_chart.jpg')");
+					console.log(cardShape);
+					break;
+				case "queen":
+					setCSS(card, "backgroundImage", "url('http://artofdesign.files.wordpress.com/2006/09/queenhe.jpg')");
+					break;
+				default:
+					setCSS(card, "background", "#ccc");
+					console.log(cardShape, "no card data");
+					break;
+			}
+
+		}
+
+
+		function setCSS(target, property, value){
+			var elementStyle = target.style;
+
+			//cache current style
+			gameHistory.logBackgroundImgHistory(elementStyle[property.toString()]);
+			console.log("logging this: ", elementStyle[property.toString()]);
+
+			elementStyle[property.toString()] = value.toString();
+		}
+
+
+		var gameHistory = {
+			numberSteps: 0,
+			iterate: function(x){
+				this.numberSteps += x;
+				return this.numberSteps;
+			},
+			logBackgroundImgHistory: function(currentStyle){
+				var cache = cache || [];
+				var uniqueKey = this.iterate(1);
+
+				cache[uniqueKey] = currentStyle;
+
+				console.log(uniqueKey);
+				console.log(cache.length);
+			}
+		}
+
+
+		function fadeOutCard(e){
+			setTimeout(function(){
+				//NICE FADE
+				//e.target.style.transition = "opacity 1.0s linear 0s"; 
+				//e.target.style.opacity = "0";
+				e.target.style.transition = "backgroundImage 1.0s linear 0s"; 
+				e.target.style.backgroundImage = "url('')";
+			}, 600);
+		}
+	</script>
+</body>
+
+</html>
