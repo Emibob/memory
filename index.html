@@ -26,13 +26,13 @@
 <body>
 	<ul id="grid">
 		<li><div class="box" data-flip="king"></div></li>
-		<li><div class="box" data-flip="circle"></div></li>
+		<li><div class="box" data-flip="joker"></div></li>
 		<li><div class="box" data-flip="queen"></div></li>
-		<li><div class="box" data-flip="circle"></div></li>
-		<li><div class="box" data-flip="circle"></div></li>
+		<li><div class="box" data-flip="joker"></div></li>
+		<li><div class="box" data-flip="joker"></div></li>
 		<li><div class="box" data-flip="king"></div></li>
-		<li><div class="box" data-flip="circle"></div></li>
-		<li><div class="box" data-flip="circle"></div></li>
+		<li><div class="box" data-flip="joker"></div></li>
+		<li><div class="box" data-flip="joker"></div></li>
 		<li><div class="box" data-flip="queen"></div></li>
 	</ul>
 
@@ -65,17 +65,17 @@
 			var cardShape = getDataFlip(e);
 			var card = e.target;
 
+			console.log("this card is a " + cardShape);
+
 			switch(cardShape){
 				case "king":
 					setCSS(card, "backgroundImage", "url('img/king.jpg')");
-					console.log(cardShape);
 					break;
 				case "queen":
 					setCSS(card, "backgroundImage", "url('img/queen.jpg')");
 					break;
 				default:
 					setCSS(card, "backgroundImage", "url('img/joker.jpg')");
-					console.log(cardShape, "no card data");
 					break;
 			}
 
@@ -157,18 +157,24 @@
 
 		function fadeOutCard(e){
 			var cardsActive = queryActiveCards(e);
+
+			console.log("there are " + cardsActive.length + " active cards");
 			
 			if(cardsActive.length === 1){
 				setTimeout(function(){
 					//NICE FADE
 					//e.target.style.transition = "opacity 1.0s linear 0s"; 
 					//e.target.style.opacity = "0";
-				
-					//e.target.style.transition = "backgroundImage 1.0s linear 0s"; 
 					setCSS(e.target, "backgroundImage", "");
 				}, 900);
 			}
-			else{ console.log("not one card, don't fade"); }
+			else{
+				if(cardsMatch(cardsActive)){
+					setCSS(cardsActive[0], "border", "1px solid red");
+					//if it's a match, find last clicked fading card, clearTimeout the fade & then set it to active again?
+				} 
+				console.log("no fade applied to this 2nd card... but FIRST card will fade...");
+			}
 		}
 
 
