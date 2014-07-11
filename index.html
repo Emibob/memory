@@ -5,27 +5,25 @@
 	<title>Memory</title>
 </head>
 
-<style>
-#grid{
-	width: 370px;
-	list-style: none;
-}
-.box{
-	width: 100px;
-	height: 150px;
-	border: 1px solid #ccc;
-	float: left;
-	background-position: center;
-	background-repeat: no-repeat;
-}
-.box:hover{
-	background: #ccc;
-}
-</style>
+<link rel="stylesheet" type="text/css" href="css/css.css"
 
 <body>
+	<div id="settings">
+		<form>
+			Number of Rows: <input type="text" id="numberRows"/>
+			<br />
+			Number of Columns: <input type="text" id="numberColumns"/>
+			<br />
+			<div id="submitSettings">
+				Submit
+			</div>
+		</form>
+	</div>
+
+	<br />
+
 	<ul id="grid">
-		<li><div class="box" data-flip="king"></div></li>
+<!-- 		<li><div class="box" data-flip="king"></div></li>
 		<li><div class="box" data-flip="joker"></div></li>
 		<li><div class="box" data-flip="queen"></div></li>
 		<li><div class="box" data-flip="joker"></div></li>
@@ -33,7 +31,7 @@
 		<li><div class="box" data-flip="king"></div></li>
 		<li><div class="box" data-flip="joker"></div></li>
 		<li><div class="box" data-flip="joker"></div></li>
-		<li><div class="box" data-flip="queen"></div></li>
+		<li><div class="box" data-flip="queen"></div></li> -->
 	</ul>
 
 	<script>
@@ -44,16 +42,107 @@
 		// Randomize cards
 		// Fix 3rd click to restart bug - this has to do with onlick (3) / order of events
 		// Limit # of turns user has to complete game
+		// Display score
 		// Do something interesting if user wins game
 		// Do something interesting if user does not win game + create new game
 		// Add game history/stats to go backwards
 		// Allow multi-player games
+		// Make width of Grid UL varibale according to # of rows (width = # columns X 100px + 60 extra?)
+		//Add the Card.type & .status to the html elements as data-flip
+
+
+		var Card = function Card(type, status){
+			this.type = function(type){
+				console.log("TYPE", type);
+				if(type){
+					return type;
+				}
+				else{//FIXME
+					var types = ["king", "queen", "joker"];
+					var randomNumber = Math.round(Math.random() * 2);
+					if(randomNumber === 0){ //fuq it up moar
+						var salt = (Math.round(Math.random() * 2));
+						randomNumber += salt;
+					}
+					if(randomNumber === 1){ //fuq it up moar
+						var salt = (Math.round(Math.random() * 2)) - 1;
+						randomNumber -= salt;
+					}
+					if(randomNumber === 2){ //fuq it up moar
+						var salt = (Math.round(Math.random() * 2)) - 2;
+						randomNumber += salt;
+					}
+					//console.log(types[randomNumber]);
+					return types[randomNumber];
+				}
+			};
+			this.status = status; //active or inactive
+			this.physicalCard = function(){
+				var listItem = document.createElement("li");
+				var divItem = document.createElement("div");
+				divItem.className = "box";
+				listItem.appendChild(divItem);
+				return listItem;
+			};
+		}
+
+		var Grid = function Grid(dimensions){
+			this.rows = dimensions[0];
+			this.columns = dimensions[1];
+			this.build = function(){
+
+				var totalBoxes = parseInt(this.rows) * parseInt(this.columns);
+				var gridList = document.getElementById("grid");
+
+				this.removeGrid();
+				
+				for(var i = 0; i < totalBoxes; i++){
+
+					//x function to randomize type
+					var cardBuilt = new Card("king", "inactive"); //y aren't they all kings now
+
+					console.log(cardBuilt.type());
+
+					gridList.appendChild(cardBuilt.physicalCard());
+				}
+				this.setWidth();
+			};
+			this.setWidth = function(){
+				var gridList = document.getElementById("grid");
+				var x = (this.columns * 100) + 60;
+				console.log("x", x);
+				console.log(x.toString() + "px");
+				gridList.style.width = x.toString() + "px";
+
+			};
+			this.removeGrid = function(){
+				var gridList = document.getElementById("grid");
+				while(gridList.firstChild){
+					gridList.removeChild(gridList.firstChild);
+				}
+			}
+		}
 
 		//EVENTS
+		document.getElementById('submitSettings').addEventListener('click', buildGrid, false);
 		document.getElementById('grid').addEventListener('click', queryActiveCards, false);
 		document.getElementById('grid').addEventListener('click', getDataFlip, false);
 		document.getElementById('grid').addEventListener('click', revealCard, false);
 		document.getElementById('grid').addEventListener('click', fadeOutCard, false);
+
+
+		function getGridDimensions(){
+			var rows = document.getElementById("numberRows").value || 5;
+			var columns = document.getElementById("numberColumns").value || 5;
+
+			return [rows, columns]; 
+		}
+
+		function buildGrid(){
+			var dimensions = getGridDimensions();
+			var newGrid = new Grid(dimensions);
+			newGrid.build();
+		}
 
 		function getDataFlip(e){
 			var dataFlip = e.toElement.attributes['data-flip'].nodeValue;
@@ -138,20 +227,20 @@
 		}
 
 
-		var gameHistory = {
-			numberSteps: 0,
-			iterate: function(x){
-				this.numberSteps += x;
-				return this.numberSteps;
-			},
-			logBackgroundImgHistory: function(currentStyle){
-				var cache = cache || [];
-				var uniqueKey = this.iterate(1);
+		// var gameHistory = {
+		// 	numberSteps: 0,
+		// 	iterate: function(x){
+		// 		this.numberSteps += x;
+		// 		return this.numberSteps;
+		// 	},
+		// 	logBackgroundImgHistory: function(currentStyle){
+		// 		var cache = cache || [];
+		// 		var uniqueKey = this.iterate(1);
 
-				cache[uniqueKey] = currentStyle;
-				console.log(cache);
-			}
-		}
+		// 		cache[uniqueKey] = currentStyle;
+		// 		console.log(cache);
+		// 	}
+		// }
 
 
 
