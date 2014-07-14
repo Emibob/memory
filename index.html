@@ -5,9 +5,13 @@
 	<title>Memory</title>
 </head>
 
-<link rel="stylesheet" type="text/css" href="css/css.css"
+<link rel="stylesheet" type="text/css" href="css/css.css">
+<link href='http://fonts.googleapis.com/css?family=Philosopher:400,700' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Yanone+Kaffeesatz:300' rel='stylesheet' type='text/css'>
 
 <body>
+	<h1>Memory</h1>
+
 	<div id="settings">
 		<form>
 			Number of Rows: <input type="text" id="numberRows"/>
@@ -22,17 +26,7 @@
 
 	<br />
 
-	<ul id="grid">
-<!-- 		<li><div class="box" data-flip="king"></div></li>
-		<li><div class="box" data-flip="joker"></div></li>
-		<li><div class="box" data-flip="queen"></div></li>
-		<li><div class="box" data-flip="joker"></div></li>
-		<li><div class="box" data-flip="joker"></div></li>
-		<li><div class="box" data-flip="king"></div></li>
-		<li><div class="box" data-flip="joker"></div></li>
-		<li><div class="box" data-flip="joker"></div></li>
-		<li><div class="box" data-flip="queen"></div></li> -->
-	</ul>
+	<ul id="grid"></ul>
 
 	<script>
 
@@ -49,87 +43,97 @@
 		// Allow multi-player games
 		// Make width of Grid UL varibale according to # of rows (width = # columns X 100px + 60 extra?)
 		//Add the Card.type & .status to the html elements as data-flip
+		// Take the type of Card & extenalize info in form of data-flip
+		// Have different deck types
 
+		var myApp = {};
 
-		var Card = function Card(type, status){
-			this.type = function(type){
-				console.log("TYPE", type);
-				if(type){
-					return type;
-				}
-				else{//FIXME
-					var types = ["king", "queen", "joker"];
-					var randomNumber = Math.round(Math.random() * 2);
-					if(randomNumber === 0){ //fuq it up moar
-						var salt = (Math.round(Math.random() * 2));
-						randomNumber += salt;
-					}
-					if(randomNumber === 1){ //fuq it up moar
-						var salt = (Math.round(Math.random() * 2)) - 1;
-						randomNumber -= salt;
-					}
-					if(randomNumber === 2){ //fuq it up moar
-						var salt = (Math.round(Math.random() * 2)) - 2;
-						randomNumber += salt;
-					}
-					//console.log(types[randomNumber]);
-					return types[randomNumber];
-				}
-			};
+		//CARD OBJECT
+		var Card = function Card(status, id){
 			this.status = status; //active or inactive
-			this.physicalCard = function(){
-				var listItem = document.createElement("li");
-				var divItem = document.createElement("div");
-				divItem.className = "box";
-				listItem.appendChild(divItem);
-				return listItem;
-			};
+			this.id = id;
+			this.type;
 		}
 
+		Card.prototype.setType = function(){
+			if(this.type){
+				return this.type;
+			}
+			else{
+				var types = ["king", "queen", "joker"];
+				var randomNumber = Math.round(Math.random() * 2);
+				
+				this.type = types[randomNumber];
+				return types[randomNumber];
+			}
+		};
+
+		Card.prototype.physicalCard = function(){
+			var listItem = document.createElement("li");
+			var divItem = document.createElement("div");
+			
+			divItem.className = "box";
+			divItem.setAttribute("data-status", this.status);
+			divItem.setAttribute("data-cardid", this.id);
+
+			listItem.appendChild(divItem);
+			return listItem;
+		};
+
+
+		//GRID OBJECT
 		var Grid = function Grid(dimensions){
 			this.rows = dimensions[0];
 			this.columns = dimensions[1];
-			this.build = function(){
-
-				var totalBoxes = parseInt(this.rows) * parseInt(this.columns);
-				var gridList = document.getElementById("grid");
-
-				this.removeGrid();
-				
-				for(var i = 0; i < totalBoxes; i++){
-
-					//x function to randomize type
-					var cardBuilt = new Card("king", "inactive"); //y aren't they all kings now
-
-					console.log(cardBuilt.type());
-
-					gridList.appendChild(cardBuilt.physicalCard());
-				}
-				this.setWidth();
-			};
-			this.setWidth = function(){
-				var gridList = document.getElementById("grid");
-				var x = (this.columns * 100) + 60;
-				console.log("x", x);
-				console.log(x.toString() + "px");
-				gridList.style.width = x.toString() + "px";
-
-			};
-			this.removeGrid = function(){
-				var gridList = document.getElementById("grid");
-				while(gridList.firstChild){
-					gridList.removeChild(gridList.firstChild);
-				}
-			}
 		}
+		
+		Grid.prototype.build = function(){
+			var deck = [];
+			var totalBoxes = parseInt(this.rows) * parseInt(this.columns);
+			var gridList = document.getElementById("grid");
+
+			this.removeGrid();
+				
+			for(var i = 0; i < totalBoxes; i++){
+
+				var cardBuilt = new Card("inactive", i);
+				cardBuilt.setType();
+				console.log(cardBuilt.type);
+				gridList.appendChild(cardBuilt.physicalCard());
+
+				deck.push(cardBuilt);
+			}
+
+			this.setWidth();
+
+			myApp.deck = deck; //ermmm
+			// return deck;
+		};
+
+		Grid.prototype.setWidth = function(){
+			var gridList = document.getElementById("grid");
+			var x = (this.columns * 100) + 60;
+			gridList.style.width = x.toString() + "px";
+
+		};
+
+		Grid.prototype.removeGrid = function(){
+			var gridList = document.getElementById("grid");
+			while(gridList.firstChild){
+				gridList.removeChild(gridList.firstChild);
+			}
+		};
+
+		Grid.prototype.getDeck = function(){
+			return this.deck;
+		}
+
 
 		//EVENTS
 		document.getElementById('submitSettings').addEventListener('click', buildGrid, false);
 		document.getElementById('grid').addEventListener('click', queryActiveCards, false);
-		document.getElementById('grid').addEventListener('click', getDataFlip, false);
 		document.getElementById('grid').addEventListener('click', revealCard, false);
 		document.getElementById('grid').addEventListener('click', fadeOutCard, false);
-
 
 		function getGridDimensions(){
 			var rows = document.getElementById("numberRows").value || 5;
@@ -144,21 +148,22 @@
 			newGrid.build();
 		}
 
-		function getDataFlip(e){
-			var dataFlip = e.toElement.attributes['data-flip'].nodeValue;
-			//console.log(dataFlip, e);
-			return dataFlip;
+		function getDataCardId(e){
+			var dataCardId = e.toElement.attributes['data-cardid'].nodeValue;
+			return dataCardId;
 		}
 
 		function revealCard(e){
-			var cardShape = getDataFlip(e);
+			var cardId = getDataCardId(e);
+			var cardShape = myApp.deck[cardId].type;
+			console.log("cardShape", cardShape);
 			var card = e.target;
 
-			console.log("this card is a " + cardShape);
+			var changeStat = toggleCardStatus(myApp.deck[cardId].status, cardId);
 
 			switch(cardShape){
 				case "king":
-					setCSS(card, "backgroundImage", "url('img/king.jpg')");
+					setCSS(card, "backgroundImage", "url('img/king.jpg')");//make this map to the cardShape.jpg
 					break;
 				case "queen":
 					setCSS(card, "backgroundImage", "url('img/queen.jpg')");
@@ -170,34 +175,86 @@
 
 		}
 
-		function queryActiveCards(e){ //determines which cards have been flipped
-			var boxes = document.querySelectorAll('.box');
-			var activeBoxes = [];
+		function toggleCardStatus(cardStats, cardId){
+			var targetedCard = myApp.deck[cardId];
 
+			if(cardStats === "inactive"){
+				targetedCard.status = "active";
+			}
+			else{
+				targetedCard.status = "inactive";
+			}
+		}
+
+		function fadeOutCard(e){
+			var cardsActive = queryActiveCards(e);
+			var IdNumber = getDataCardId(e);
+
+			console.log("there are " + cardsActive.length + " active cards");
+			
+			if(cardsActive.length === 1){
+
+				setTimeout(function(){
+					setCSS(getBoxElemByNumber(IdNumber), "backgroundImage", "");
+					toggleCardStatus("active", IdNumber);
+				}, 900);
+			}
+			else{
+				if(cardsMatch(cardsActive)){
+					// setCSS(cardsActive[0], "border", "1px solid red");
+					// setCSS(cardsActive[1], "border", "1px solid blue");
+					// setCSS(cardsActive[0], "background", "#000");
+					//if it's a match, find last clicked fading card, clearTimeout the fade & then set it to active again?
+				} 
+				console.log("no fade applied to this 2nd card... but FIRST card will fade...");
+			}
+		}
+
+		function getBoxElemByNumber(IdNumber){
+			var boxes = document.querySelectorAll('.box');
 			for(var i = 0; i < boxes.length; i++){
-				if(boxes[i].style.background !== ""){
-					activeBoxes.push(boxes[i]);
+				if(boxes[i].getAttribute("data-cardid") === IdNumber){
+					return boxes[i];
+				}
+				else{ continue; }
+			}
+		}
+
+		function queryActiveCards(e){ //determines which cards have been flipped
+			var targetCard = getDataCardId(e);
+			var activeCards = [];
+
+			for(var i = 0; i < myApp.deck.length; i++){
+				if(myApp.deck[i].status === "active"){
+					activeCards.push(myApp.deck[i]);
 				}
 				else{ continue; }
 			}
 
-			if(activeBoxes.length >= 2){ //FIXME
-				if(cardsMatch(activeBoxes)){
-					console.log("match confirmed, don't remove these");
+			if(activeCards.length === 2){
+				if(cardsMatch(activeCards)){
+					console.log("the cards match");
 				}
 				else{
 					clearGrid();
 				}
+
+			}
+			if(activeCards.length > 2){
+				console.log("the fuq are there more than 2 active cards for?");
+				clearGrid();
 			}
 
-			return activeBoxes;
+			return activeCards;
 		}
 
 
 		function cardsMatch(activeCards){ //determines if there is a match among flipped cards
-			if(activeCards[0].dataset.flip ===  activeCards[1].dataset.flip){
+			if(activeCards[0].type ===  activeCards[1].type){
 				console.log("MATCH");
 				alert("Congratulations, you won!");
+				//remove the click event listeners to prevent user from continuing to play?
+				//give option to begin new game?
 				return true;
 			}
 			else{ 
@@ -209,61 +266,15 @@
 
 		function clearGrid(){
 			var boxes = document.querySelectorAll('.box');
-
 			for(var i = 0; i < boxes.length; i++){
 				boxes[i].style.background = "";
 			}
-			console.log("board cleared");
 		}
 
 
 		function setCSS(target, property, value){
 			var elementStyle = target.style;
-
-			//cache current style
-			//gameHistory.logBackgroundImgHistory(elementStyle[property.toString()]);
-
 			elementStyle[property.toString()] = value.toString();
-		}
-
-
-		// var gameHistory = {
-		// 	numberSteps: 0,
-		// 	iterate: function(x){
-		// 		this.numberSteps += x;
-		// 		return this.numberSteps;
-		// 	},
-		// 	logBackgroundImgHistory: function(currentStyle){
-		// 		var cache = cache || [];
-		// 		var uniqueKey = this.iterate(1);
-
-		// 		cache[uniqueKey] = currentStyle;
-		// 		console.log(cache);
-		// 	}
-		// }
-
-
-
-		function fadeOutCard(e){
-			var cardsActive = queryActiveCards(e);
-
-			console.log("there are " + cardsActive.length + " active cards");
-			
-			if(cardsActive.length === 1){
-				setTimeout(function(){
-					//NICE FADE
-					//e.target.style.transition = "opacity 1.0s linear 0s"; 
-					//e.target.style.opacity = "0";
-					setCSS(e.target, "backgroundImage", "");
-				}, 900);
-			}
-			else{
-				if(cardsMatch(cardsActive)){
-					setCSS(cardsActive[0], "border", "1px solid red");
-					//if it's a match, find last clicked fading card, clearTimeout the fade & then set it to active again?
-				} 
-				console.log("no fade applied to this 2nd card... but FIRST card will fade...");
-			}
 		}
 
 
