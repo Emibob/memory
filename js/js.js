@@ -18,7 +18,9 @@
 
 var myMemory = {};
 
-//CARD OBJECT
+/**********
+CARD OBJECT
+**********/
 var Card = function Card(status, id){
 	this.status = status; //active or inactive
 	this.id = id;
@@ -51,7 +53,9 @@ Card.prototype.physicalCard = function(){
 };
 
 
-//GRID OBJECT
+/**********
+GRID OBJECT
+**********/
 var Grid = function Grid(dimensions){
 	this.rows = dimensions[0];
 	this.columns = dimensions[1];
@@ -62,34 +66,33 @@ Grid.prototype.build = function(){
 	var totalBoxes = parseInt(this.rows) * parseInt(this.columns);
 	var gridList = document.getElementById("grid");
 
-	this.removeGrid();
+	this.removeGrid(); //if we have a leftover grid, remove it before building a new one
 		
 	for(var i = 0; i < totalBoxes; i++){
 
-		var cardBuilt = new Card("inactive", i);
-		cardBuilt.setType();
-		console.log(cardBuilt.type);
-		gridList.appendChild(cardBuilt.physicalCard());
+		var cardBuilt = new Card("inactive", i); //create a new, inactive card
+		cardBuilt.setType(); //randomly set the new card's type
 
-		deck.push(cardBuilt);
+		gridList.appendChild(cardBuilt.physicalCard()); //add the card elements to the grid
+
+		deck.push(cardBuilt); //compile a deck array
 	}
 
-	this.setWidth();
+	this.setWidth(); //set width of grid container dynamically
 
-	myMemory.deck = deck; //ermmm
+	//maybe this can be wrapped into a init starter deck function:
+	myMemory.deck = deck;
 	myMemory.turnsRemaining = 6;
 	myMemory.message = "";
 	myMemory.wonGames = myMemory.wonGames || 0;
 	myMemory.totalGames = myMemory.totalGames || 0;
 	myMemory.gameStatus = "in play";
-	// return deck;
 };
 
 Grid.prototype.setWidth = function(){
 	var gridList = document.getElementById("grid");
-	var x = (this.columns * 100) + 60;
+	var x = (this.columns * 100) + 60; //TODO: see if we can remove extra 60px
 	gridList.style.width = x.toString() + "px";
-
 };
 
 Grid.prototype.removeGrid = function(){
@@ -107,9 +110,10 @@ Grid.prototype.getDeck = function(){
 //INIT EVENTS
 document.getElementById('submitSettings').addEventListener('click', buildGrid, false);
 
-function updateStats(){
+function updateStats(){ //this updates myMemory values on each click
 	myMemory.turnsRemaining -= 1;
 
+	//REFACTOR
 	if(myMemory.turnsRemaining < 0){
 		myMemory.message = "GAME OVER. Play again?<br /><br />Click the BUILD button to start a new game<br /><br />";
 		myMemory.gameStatus = "lost";
@@ -131,23 +135,6 @@ function updateStats(){
 	displayStats();
 }
 
-function promptNewGame(){
-	setTimeout(function(){ //so we can see the match for a bit
-		Grid.prototype.removeGrid();
-	}, 900);
-
-	var grid = document.getElementById('grid');
-
-	grid.removeEventListener('click', queryActiveCards, false);
-	grid.removeEventListener('click', revealCard, false);
-	grid.removeEventListener('click', fadeOutCard, false);
-	grid.removeEventListener('click', updateStats, false);
-
-	if(myMemory.gameStatus === "lost"){
-		console.log("you lost");
-	}
-}
-
 function displayStats(){
 	var message = document.getElementById("message");
 	message.innerHTML = myMemory.message;
@@ -167,14 +154,21 @@ function displayStats(){
 	score.innerHTML = myMemory.wonGames + " games won out of " + myMemory.totalGames;
 }
 
-function getGridDimensions(){
-	var rows = document.getElementById("numberRows").value || 4;
-	var columns = document.getElementById("numberColumns").value || 4;
+function promptNewGame(){//change this name
+	setTimeout(function(){ //delay clearing the old grid so we can see the match for a bit
+		Grid.prototype.removeGrid();
+	}, 900);
 
-	return [rows, columns]; 
+	var grid = document.getElementById('grid');
+
+	//disables user from continuing to play
+	grid.removeEventListener('click', queryActiveCards, false);
+	grid.removeEventListener('click', revealCard, false);
+	grid.removeEventListener('click', fadeOutCard, false);
+	grid.removeEventListener('click', updateStats, false);
 }
 
-function buildGrid(){
+function buildGrid(){ //maybe rename to avoid confusion with object method
 	var dimensions = getGridDimensions();
 	var newGrid = new Grid(dimensions);
 	newGrid.build();
@@ -187,39 +181,30 @@ function buildGrid(){
 	grid.addEventListener('click', updateStats, false);
 }
 
+function getGridDimensions(){
+	var rows = document.getElementById("numberRows").value || 4;
+	var columns = document.getElementById("numberColumns").value || 4;
+
+	return [rows, columns]; 
+}
+
 function getDataCardId(e){
 	var dataCardId = e.toElement.attributes['data-cardid'].nodeValue;
 	return dataCardId;
 }
 
 function revealCard(e){
+	var card = e.target;
 	var cardId = getDataCardId(e);
 	var cardShape = myMemory.deck[cardId].type;
-	var card = e.target;
+	
+	toggleCardStatus(myMemory.deck[cardId].status, cardId); //change the toggle function to accept diff args
 
-	var changeStat = toggleCardStatus(myMemory.deck[cardId].status, cardId);
-
-	switch(cardShape){
-		case "king":
-			setCSS(card, "backgroundImage", "url('img/king.jpg')");//make this map to the cardShape.jpg
-			break;
-		case "queen":
-			setCSS(card, "backgroundImage", "url('img/queen.jpg')");
-			break;
-		case "joker":
-			setCSS(card, "backgroundImage", "url('img/joker.jpg')");
-			break;
-		case "ace":
-			setCSS(card, "backgroundImage", "url('img/ace.jpg')");
-			break;
-		default:
-			setCSS(card, "backgroundImage", "url('img/gold.jpg')");
-			break;
-	}
-
+	var url = "url('img/" + cardShape + ".jpg')";
+	setCSS(card, "backgroundImage", url);
 }
 
-function toggleCardStatus(cardStats, cardId){
+function toggleCardStatus(cardStats, cardId){ //REFACTOR so it's an actual toggle rather than setting hardcoded value
 	var targetedCard = myMemory.deck[cardId];
 
 	if(cardStats === "inactive"){
@@ -230,12 +215,9 @@ function toggleCardStatus(cardStats, cardId){
 	}
 }
 
-function fadeOutCard(e){
-	var cardsActive = queryActiveCards(e);
-	var IdNumber = getDataCardId(e);
-
-	console.log("there are " + cardsActive.length + " active cards: ");
-	console.log(cardsActive);
+function fadeOutCard(e){ //rename - deactivate?
+	var cardsActive = queryActiveCards(e); //find all active cards
+	//console.log("there are " + cardsActive.length + " active cards: ");
 	
 	if(cardsActive.length === 1){
 		//do nothing
@@ -243,15 +225,13 @@ function fadeOutCard(e){
 	if(cardsActive.length === 2){
 		setTimeout(function(){
 			toggleCardStatus("active", cardsActive[0].id.toString());
-			toggleCardStatus("active", cardsActive[1].id.toString()); //this is crap
+			toggleCardStatus("active", cardsActive[1].id.toString()); //change the toggle function args
 		}, 900);
 	}
-	else{
-		if(myMemory.gameStatus === "won"){
-			setTimeout(function(){
-				turnOffFade(cardsActive[0], cardsActive[1]);
-			}, 300); //UGH this sucks
-		} 
+	else if(myMemory.gameStatus === "won"){
+		setTimeout(function(){
+			turnOffFade(cardsActive[0], cardsActive[1]);
+		}, 300); //UGH this sucks
 	}
 }
 
@@ -261,15 +241,11 @@ function getBoxElemByNumber(IdNumber){
 		if(boxes[i].getAttribute("data-cardid") === IdNumber){
 			return boxes[i];
 		}
-		else{ 
-			console.log("did not match " + boxes[i]);
-			continue; 
-		}
+		else{ continue; }
 	}
 }
 
-function queryActiveCards(e){ //determines which cards have been flipped
-	var targetCard = getDataCardId(e);
+function queryActiveCards(e){ //returns active cards, clears grid if 2 actives do not match (REFACTOR)
 	var activeCards = [];
 
 	for(var i = 0; i < myMemory.deck.length; i++){
@@ -279,11 +255,11 @@ function queryActiveCards(e){ //determines which cards have been flipped
 		else{ continue; }
 	}
 
-	if(activeCards.length === 2){
+	if(activeCards.length === 2){ //Break out into new function / we're getting this in fadeOutCard
 		if(cardsMatch(activeCards)){
 			console.log("the cards match");
 		}
-		else{
+		else{ //What does this have to do with querying active cards? Move this out
 			setTimeout(function(){ //so we can see second card for a bit
 				clearGrid();
 			}, 900);
@@ -299,9 +275,14 @@ function queryActiveCards(e){ //determines which cards have been flipped
 	return activeCards;
 }
 
-function turnOffFade(target1, target2){ //make this less shitty
-	var t1 = target1.id.toString();
-	var t2 = target2.id.toString(); 
+function turnOffFade(target1, target2){ 
+	// Takes 2 cards (inpractice, the last 2 active),
+	// Sets their background image according to their type. 
+	// Use this function to refactor the revealCard function? 
+	// Rename
+
+	var t1 = target1.id.toString();//better check w/ error messages pls
+	var t2 = target2.id.toString();//better check w/ error messages pls
 
 	var card1 = getBoxElemByNumber(t1);
 	var card2 = getBoxElemByNumber(t2);
@@ -317,20 +298,13 @@ function cardsMatch(activeCards){ //determines if there is a match among flipped
 		console.log("ERROR: Attempting to matching less than 2 cards");
 	}
 	if(activeCards[0].type ===  activeCards[1].type){
-		console.log("activeCards[0].type = " + activeCards[0].type);
-		console.log("activeCards[1].type = " + activeCards[1].type);
-		console.log("MATCH DETECTED");
-
-		alert("Congratulations, you matched two " + activeCards[0].type + " cards together!");
+		console.log("MATCH DETECTED: Congratulations, you matched two " + activeCards[0].type + " cards together!");
 
 		myMemory.gameStatus = "won";
-		//give option to begin new game?
-
 		return true;
 	}
 	else{ 
-		console.log("activeCards = " + activeCards);
-		console.log("NO MATCH");
+		console.log("These cards do not match");
 		return false;
 	}
 }
@@ -339,7 +313,7 @@ function cardsMatch(activeCards){ //determines if there is a match among flipped
 function clearGrid(){
 	var boxes = document.querySelectorAll('.box');
 	for(var i = 0; i < boxes.length; i++){
-		boxes[i].style.background = "";
+		boxes[i].style.background = ""; //um is this actually working, it's just background not backgroundImage
 	}
 }
 
