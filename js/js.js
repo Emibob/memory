@@ -82,16 +82,12 @@ Grid.prototype.build = function(){
 
 	//maybe this can be wrapped into a init starter deck function:
 	myMemory.deck = deck;
-	myMemory.turnsRemaining = 6;
-	myMemory.message = "";
-	myMemory.wonGames = myMemory.wonGames || 0;
-	myMemory.totalGames = myMemory.totalGames || 0;
-	myMemory.gameStatus = "in play";
+	resetGameStats();
 };
 
 Grid.prototype.setWidth = function(){
 	var gridList = document.getElementById("grid");
-	var x = (this.columns * 100) + 60; //TODO: see if we can remove extra 60px
+	var x = (this.columns * 100); //TODO: see if we can remove extra 60px
 	gridList.style.width = x.toString() + "px";
 };
 
@@ -109,6 +105,14 @@ Grid.prototype.getDeck = function(){
 
 //INIT EVENTS
 document.getElementById('submitSettings').addEventListener('click', buildGrid, false);
+
+function resetGameStats(numberTurns){
+	myMemory.turnsRemaining = numberTurns || 6;
+	myMemory.message = "";
+	myMemory.wonGames = myMemory.wonGames || 0;
+	myMemory.totalGames = myMemory.totalGames || 0;
+	myMemory.gameStatus = "in play";
+}
 
 function updateStats(){ //this updates myMemory values on each click
 	myMemory.turnsRemaining -= 1;
