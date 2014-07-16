@@ -76,4 +76,74 @@ input{
 }
 .box:hover{
 	background: #D8DAE0;
+	/*-webkit-animation: cardFade 0.2s;
+	animation: cardFade 0.2s;*/
+}
+
+/*@-webkit-keyframes cardFade{
+	0% {background: #fff;}
+	100% {background: #D8DAE0;}
+}
+@keyframes cardFade{
+	0% {background: #fff;}
+	100% {background: #D8DAE0;}
+}*/
+
+.dot1{
+	-webkit-animation: dotAnimate 18s;
+	animation: dotAnimate 18s;
+}
+.dot2{
+	-webkit-animation: dotAnimate 19s;
+	animation: dotAnimate 19s;
+}
+.dot3{
+	-webkit-animation: dotAnimate 20s;
+	animation: dotAnimate 20s;
+}
+@-webkit-keyframes dotAnimate{
+	0% {color: #F50C5A;}
+	5% {color: #0E2A98;}
+	10% {color: #FA7826;}
+	15% {color: #18FBE8;}
+	20% {color: #7318FB;}
+	25% {color: #C40C02;}
+	30% {color: #F91EF2;}
+	35% {color: #3E0BB6;}
+	40% {color: #05CE62;}
+	45% {color: #05CEAF;}
+	50% {color: #22DCF5;}
+	55% {color: #F50C5A;}
+	60% {color: #0E2A98;}
+	65% {color: #FA7826;}
+	70% {color: #18FBE8;}
+	75% {color: #7318FB;}
+	80% {color: #C40C02;}
+	85% {color: #F91EF2;}
+	90% {color: #3E0BB6;}
+	95% {color: #05CE62;}
+	100% {color: #05CEAF;}
+}
+@keyframes dotAnimate{
+	0% {color: #F50C5A;}
+	5% {color: #0E2A98;}
+	10% {color: #FA7826;}
+	15% {color: #18FBE8;}
+	20% {color: #7318FB;}
+	25% {color: #C40C02;}
+	30% {color: #F91EF2;}
+	35% {color: #3E0BB6;}
+	40% {color: #05CE62;}
+	45% {color: #05CEAF;}
+	50% {color: #22DCF5;}
+	55% {color: #F50C5A;}
+	60% {color: #0E2A98;}
+	65% {color: #FA7826;}
+	70% {color: #18FBE8;}
+	75% {color: #7318FB;}
+	80% {color: #C40C02;}
+	85% {color: #F91EF2;}
+	90% {color: #3E0BB6;}
+	95% {color: #05CE62;}
+	100% {color: #05CEAF;}
 }

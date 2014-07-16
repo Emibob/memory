@@ -12,7 +12,7 @@
 
 <body>
 	<div id="gameInfo">
-		<span id="message">Welcome! Please enter the number of rows & columns you would like to play with.<br /><br />If you do not enter a number, the grid will default to 3 X 3.</span>
+		<span id="message">Welcome! Please enter the number of rows & columns you would like to play with.<br /><br />If you do not enter a number, the grid will default to 3 X 3.<br /><br />Click boxes to reveal cards. Remember where cards are. Tow win, match two cards before you run out of turns.</span>
 		<br />
 		<span id="movesLeft"></span>
 		<br />
@@ -159,7 +159,7 @@
 				promptNewGame();
 			}
 			else{
-				myApp.message = "Game in play...";
+				myApp.message = "Game in play<span class='dot1'>.</span><span class='dot2'>.</span><span class='dot3'>.</span>";
 			}
 			displayStats();
 		}
